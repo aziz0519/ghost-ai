@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 export default function Home() {
   return (
     <EditorShell>
-      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-base px-6 py-10 text-primary">
+      <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-base px-6 py-10 text-primary">
         <div className="w-full max-w-5xl space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -75,7 +75,7 @@ export default function Home() {
             </Card>
           </div>
         </div>
-      </main>
+      </section>
     </EditorShell>
   );
 }
