@@ -1,5 +1,6 @@
 "use client";
 
+import { UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
@@ -29,7 +30,9 @@ export function EditorNavbar({ isSidebarOpen, onToggleSidebar }: EditorNavbarPro
         <div className="text-sm text-muted-foreground">Workspace</div>
       </div>
 
-      <div className="flex flex-1 justify-end" />
+      <div className="flex flex-1 justify-end">
+        <UserButton />
+      </div>
     </header>
   );
 }
