@@ -12,7 +12,13 @@
 set -euo pipefail
 
 # Walk up from $PWD to find .env/.env.local (mirrors Clerk CLI behavior).
-# Stops at the first directory that provides CLERK_SECRET_KEY.
+# Stop at the repo root (or the filesystem root) so we do not source unrelated
+# parent env files above the project.
+_repo_root=""
+if command -v git >/dev/null 2>&1; then
+  _repo_root="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || true)"
+fi
+
 _dir="$PWD"
 while true; do
   for _envfile in "$_dir/.env" "$_dir/.env.local"; do
@@ -23,11 +29,15 @@ while true; do
     fi
   done
   [[ -n "${CLERK_SECRET_KEY:-}" ]] && break
+
   _parent="$(dirname "$_dir")"
   [[ "$_parent" == "$_dir" ]] && break
+  if [[ -n "$_repo_root" && "$_dir" == "$_repo_root" ]]; then
+    break
+  fi
   _dir="$_parent"
 done
-unset _dir _parent _envfile
+unset _dir _parent _envfile _repo_root
 
 # Parse --admin flag
 ADMIN=false
