@@ -136,18 +136,27 @@ export async function POST(req: NextRequest) {
       html: `<p>Hi ${name}, welcome to our app!</p>`,
     })
 
-    // Step 5: Post notification to Slack channel
-    await fetch(process.env.SLACK_WEBHOOK_URL!, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: `New user signed up: ${name} (${email})`,
-      }),
-    })
+    // Step 5: Defer the Slack notification so the webhook can ack quickly.
+    // In production, replace this with your queue/worker integration.
+    void queueSlackNotification({ userId: id, name, email })
   }
 
   // Always return 200 to acknowledge receipt
   return new Response('OK', { status: 200 })
+}
+
+async function queueSlackNotification(payload: { userId: string; name: string; email?: string }) {
+  try {
+    await fetch(process.env.SLACK_WEBHOOK_URL!, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: `New user signed up: ${payload.name} (${payload.email})`,
+      }),
+    })
+  } catch (error) {
+    console.error('Slack notification failed:', error)
+  }
 }
 ```
 
