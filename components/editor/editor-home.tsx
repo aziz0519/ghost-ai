@@ -1,79 +1,147 @@
+"use client";
+
+import { Plus } from "lucide-react";
 import { EditorShell } from "@/components/editor/editor-shell";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
+import { useProjectDialogs } from "@/components/editor/use-project-dialogs";
 
 export function EditorHomeContent() {
+  const {
+    dialogType,
+    selectedProject,
+    isLoading,
+    formData,
+    openCreateDialog,
+    closeDialog,
+    setName,
+    setSlug,
+    handleCreate,
+    handleRename,
+    handleDelete,
+  } = useProjectDialogs();
+
+  const isCreateDialog = dialogType === "create";
+  const isRenameDialog = dialogType === "rename";
+  const isDeleteDialog = dialogType === "delete";
+
   return (
     <EditorShell>
       <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-base px-6 py-10 text-primary">
-        <div className="w-full max-w-5xl space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.28em] text-muted-foreground">Ghost AI</p>
-              <h1 className="text-3xl font-semibold text-foreground">Editor chrome foundation</h1>
-            </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>Open dialog</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Interface preview</DialogTitle>
-                  <DialogDescription>These primitives now use the shared dark theme and shadcn structure.</DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
+        <div className="w-full max-w-3xl space-y-6 text-center">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold text-foreground">Create a project or open an existing one</h1>
+            <p className="text-lg text-muted-foreground">
+              Start a new architecture workspace, or choose a project from the sidebar.
+            </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <Card>
-              <CardHeader>
-                <CardTitle>Workspace controls</CardTitle>
-                <CardDescription>Buttons, inputs, dialogs, and tabs all inherit the dark surface styling.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-wrap gap-3">
-                  <Button>Primary action</Button>
-                  <Button variant="outline">Secondary</Button>
-                  <Button variant="ghost">Ghost</Button>
+          <Button onClick={openCreateDialog} className="gap-2" size="lg">
+            <Plus className="h-5 w-5" />
+            New Project
+          </Button>
+
+          <Dialog open={isCreateDialog} onOpenChange={closeDialog}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create Project</DialogTitle>
+                <DialogDescription>Enter a name for your new project</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="project-name" className="text-sm font-medium text-foreground">
+                    Project Name
+                  </label>
+                  <Input
+                    id="project-name"
+                    value={formData.name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="My Project"
+                    autoFocus
+                    disabled={isLoading}
+                  />
                 </div>
-                <Input placeholder="Search workspace" />
-                <Textarea placeholder="Describe your next idea" />
-              </CardContent>
-            </Card>
+                <div className="space-y-2">
+                  <label htmlFor="project-slug" className="text-sm font-medium text-foreground">
+                    Slug
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">ghost-ai/</span>
+                    <Input
+                      id="project-slug"
+                      value={formData.slug}
+                      onChange={(e) => setSlug(e.target.value)}
+                      placeholder="my-project"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    This will be used in the project URL. Generated automatically from the name.
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={closeDialog} disabled={isLoading}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreate} disabled={!formData.name.trim() || isLoading}>
+                  {isLoading ? "Creating..." : "Create Project"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Tabs and content</CardTitle>
-                <CardDescription>Nested panels and scrollable surfaces stay aligned with the dark canvas.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Tabs defaultValue="overview" className="w-full">
-                  <TabsList>
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="notes">Notes</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="overview" className="rounded-2xl border border-border/80 bg-subtle/50 p-3">
-                    <p className="text-sm text-secondary">The UI primitives are ready for shared application screens and panels.</p>
-                  </TabsContent>
-                  <TabsContent value="notes" className="rounded-2xl border border-border/80 bg-subtle/50 p-3">
-                    <ScrollArea className="h-24">
-                      <div className="space-y-2 pr-4 text-sm text-secondary">
-                        <p>Design tokens are centralized in the global stylesheet.</p>
-                        <p>Components use the shared cn helper for utility composition.</p>
-                        <p>All surfaces remain dark and consistent by default.</p>
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </div>
+          <Dialog open={isRenameDialog} onOpenChange={closeDialog}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Rename Project</DialogTitle>
+                <DialogDescription>
+                  Currently named &ldquo;{selectedProject?.name}&rdquo;
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2">
+                <label htmlFor="rename-name" className="text-sm font-medium text-foreground">
+                  New Name
+                </label>
+                <Input
+                  id="rename-name"
+                  value={formData.name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="New project name"
+                  autoFocus
+                  disabled={isLoading}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="ghost" onClick={closeDialog} disabled={isLoading}>
+                  Cancel
+                </Button>
+                <Button onClick={handleRename} disabled={!formData.name.trim() || isLoading}>
+                  {isLoading ? "Saving..." : "Rename"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isDeleteDialog} onOpenChange={closeDialog}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-destructive">Delete Project</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete &ldquo;{selectedProject?.name}&rdquo;? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="ghost" onClick={closeDialog} disabled={isLoading}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDelete} disabled={isLoading}>
+                  {isLoading ? "Deleting..." : "Delete Project"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
     </EditorShell>
