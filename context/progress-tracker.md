@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Complete the Prisma schema, client singleton, and migration.
+- Complete the project API routes for list, create, rename, and delete.
 
 ## Completed
 
@@ -40,7 +40,16 @@ Update this file whenever the current phase, active feature, or implementation s
 - Created `lib/prisma.ts` as a cached singleton with global caching for development hot reloads
 - Ran migration successfully (20261126034813_init) - database is in sync with schema
 - Generated Prisma Client successfully
-- Verified with successful production build and no lint errors
+- Verified with successful production build and no lint errors.
+- Implemented project API routes:
+  - `GET /api/projects` - list current user's projects with collaborators
+  - `POST /api/projects` - create project (defaults name to "Untitled Project")
+  - `PATCH /api/projects/[projectId]` - rename/update project (owner only)
+  - `DELETE /api/projects/[projectId]` - delete project (owner only)
+- Security enforced:
+  - Unauthenticated requests return 401
+  - Only project owner can rename or delete (returns 403 for non-owners)
+  - Project not found returns 404
 
 ## In Progress
 
@@ -48,7 +57,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
-- Implement project APIs (06-project-apis.md)
+- Wire the UI to use the project APIs (07-wire-editor-home.md)
 - Extend the authenticated editor experience with additional panels and editor-specific interactions as new features are added.
 
 ## Open Questions
@@ -64,6 +73,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Keep mock data in the sidebar component for now; replace with API calls in future chapters.
 - Downgraded Prisma to v5 for stable schema configuration and migration support (v7 had breaking changes to config format)
 - Prisma schema uses `datasource db` with `url = env("DATABASE_URL")` in schema.prisma (v5 standard)
+- API routes use Clerk's `auth()` for authentication and enforce ownership checks
 
 ## Session Notes
 
@@ -74,3 +84,4 @@ Update this file whenever the current phase, active feature, or implementation s
 - Slug preview generates automatically from project name using lowercase, hyphen-separated format.
 - Prisma migration created tables: projects and project_collaborators with correct indexes and constraints
 - Docker PostgreSQL container used for local database
+- API routes are RESTful and follow standard conventions
