@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { Project } from "@/lib/project-types";
 
@@ -39,25 +39,38 @@ export function useProjectActions(): UseProjectActionsReturn {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ name: "", slug: "" });
+  const isLoadingRef = useRef(false);
 
   const openCreateDialog = useCallback(() => {
+    if (isLoadingRef.current) return;
     setDialogType("create");
     setSelectedProject(null);
     setFormData({ name: "", slug: "" });
   }, []);
 
   const openRenameDialog = useCallback((project: Project) => {
+    if (isLoadingRef.current) return;
     setDialogType("rename");
     setSelectedProject(project);
     setFormData({ name: project.name, slug: project.id });
   }, []);
 
   const openDeleteDialog = useCallback((project: Project) => {
+    if (isLoadingRef.current) return;
     setDialogType("delete");
     setSelectedProject(project);
   }, []);
 
   const closeDialog = useCallback(() => {
+    if (isLoadingRef.current) return;
+    setDialogType(null);
+    setSelectedProject(null);
+    setFormData({ name: "", slug: "" });
+    setIsLoading(false);
+  }, []);
+
+  const finishDialogRequest = useCallback(() => {
+    isLoadingRef.current = false;
     setDialogType(null);
     setSelectedProject(null);
     setFormData({ name: "", slug: "" });
@@ -76,7 +89,8 @@ export function useProjectActions(): UseProjectActionsReturn {
   }, []);
 
   const handleCreate = useCallback(async () => {
-    if (!formData.name.trim() || isLoading) return;
+    if (!formData.name.trim() || isLoadingRef.current) return;
+    isLoadingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -91,17 +105,19 @@ export function useProjectActions(): UseProjectActionsReturn {
       }
 
       const project = await response.json();
-      closeDialog();
+      finishDialogRequest();
       router.push(`/editor/${project.id}`);
       router.refresh();
     } catch (error) {
       console.error("Failed to create project:", error);
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [formData.name, isLoading, closeDialog, router]);
+  }, [formData.name, finishDialogRequest, router]);
 
   const handleRename = useCallback(async () => {
-    if (!formData.name.trim() || isLoading || !selectedProject) return;
+    if (!formData.name.trim() || isLoadingRef.current || !selectedProject) return;
+    isLoadingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -115,16 +131,18 @@ export function useProjectActions(): UseProjectActionsReturn {
         throw new Error("Failed to rename project");
       }
 
-      closeDialog();
+      finishDialogRequest();
       router.refresh();
     } catch (error) {
       console.error("Failed to rename project:", error);
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [formData.name, isLoading, selectedProject, closeDialog, router]);
+  }, [formData.name, selectedProject, finishDialogRequest, router]);
 
   const handleDelete = useCallback(async () => {
-    if (isLoading || !selectedProject) return;
+    if (isLoadingRef.current || !selectedProject) return;
+    isLoadingRef.current = true;
     setIsLoading(true);
 
     try {
@@ -137,7 +155,7 @@ export function useProjectActions(): UseProjectActionsReturn {
       }
 
       const isActiveWorkspace = pathname.includes(`/editor/${selectedProject.id}`);
-      closeDialog();
+      finishDialogRequest();
 
       if (isActiveWorkspace) {
         router.push("/editor");
@@ -146,9 +164,10 @@ export function useProjectActions(): UseProjectActionsReturn {
       }
     } catch (error) {
       console.error("Failed to delete project:", error);
+      isLoadingRef.current = false;
       setIsLoading(false);
     }
-  }, [isLoading, selectedProject, pathname, closeDialog, router]);
+  }, [selectedProject, pathname, finishDialogRequest, router]);
 
   const refreshProjects = useCallback(async () => {
     router.refresh();

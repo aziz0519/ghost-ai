@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 export type ProjectRole = "owner" | "collaborator";
@@ -28,15 +28,29 @@ export async function getPrimaryEmail(): Promise<string | null> {
   const { userId } = await auth();
   if (!userId) return null;
 
-  // Get user profile from Clerk to find primary email
-  // This is a placeholder - in a real implementation, you'd query Clerk's API
-  // For now, return null and let callers handle the case
-  return null;
+  try {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    const primaryEmail = user.emailAddresses.find(
+      (email) => email.id === user.primaryEmailAddressId
+    );
+
+    if (!primaryEmail || primaryEmail.verification?.status !== "verified") {
+      return null;
+    }
+
+    return primaryEmail.emailAddress.trim().toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
 }
 
 export async function checkProjectAccess(
-  projectId: string,
-  options: { userId: string; role?: ProjectRole } = { userId: "" }
+  projectId: string
 ): Promise<{
   allowed: boolean;
   role?: ProjectRole;
@@ -63,9 +77,12 @@ export async function checkProjectAccess(
   }
 
   // Check if user is a collaborator
-  const isCollaborator = project.collaborators.some(
-    (c) => c.email === userId || c.id === userId
-  );
+  const primaryEmail = await getPrimaryEmail();
+  const isCollaborator =
+    primaryEmail !== null &&
+    project.collaborators.some(
+      (collaborator) => normalizeEmail(collaborator.email) === primaryEmail
+    );
 
   if (isCollaborator) {
     return { allowed: true, role: "collaborator", projectExists: true };
@@ -88,17 +105,29 @@ export async function getProjectsWithAccess(
 
   let shared: typeof owned = [];
   if (options.includeShared) {
-    shared = await prisma.project.findMany({
-      where: {
-        collaborators: {
-          some: {
-            email: userId,
+    const primaryEmail = await getPrimaryEmail();
+    if (primaryEmail) {
+      shared = await prisma.project.findMany({
+        where: {
+          collaborators: {
+            some: {
+              email: {
+                equals: primaryEmail,
+                mode: "insensitive",
+              },
+            },
           },
         },
-      },
-      include: { collaborators: true },
-      orderBy: { createdAt: "desc" },
-    });
+        include: { collaborators: true },
+        orderBy: { createdAt: "desc" },
+      });
+
+      shared = shared.filter((project) =>
+        project.collaborators.some(
+          (collaborator) => normalizeEmail(collaborator.email) === primaryEmail
+        )
+      );
+    }
   }
 
   return { owned, shared };

@@ -1,6 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+
+const createProjectSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+});
 
 export async function GET() {
   const { userId } = await auth();
@@ -27,8 +33,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { name, description } = body;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Malformed JSON" }, { status: 400 });
+  }
+
+  const parsedBody = createProjectSchema.safeParse(body);
+  if (!parsedBody.success) {
+    return NextResponse.json({ error: "Invalid project data" }, { status: 400 });
+  }
+
+  const { name, description } = parsedBody.data;
 
   const project = await prisma.project.create({
     data: {

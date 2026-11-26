@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { EditorHomeClient } from "@/components/editor/editor-home-client";
+import { getProjectsWithAccess } from "@/lib/project-access";
 
 export default async function EditorPage() {
   const { userId } = await auth();
@@ -17,9 +18,10 @@ export default async function EditorPage() {
     },
   });
 
-  // For now, shared projects would be fetched from a different query
-  // But we can derive from collaborators for now
-  const sharedProjects: typeof projects = [];
+  const { shared: sharedProjects } = await getProjectsWithAccess({
+    userId,
+    includeShared: true,
+  });
 
   return <EditorHomeClient initialProjects={projects} sharedProjects={sharedProjects} />;
 }

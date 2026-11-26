@@ -1,6 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
+
+const updateProjectSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+});
 
 async function checkProjectOwnership(projectId: string, userId: string) {
   const project = await prisma.project.findUnique({
@@ -30,8 +36,19 @@ export async function PATCH(
   }
 
   const { projectId } = await params;
-  const body = await request.json();
-  const { name, description } = body;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Malformed JSON" }, { status: 400 });
+  }
+
+  const parsedBody = updateProjectSchema.safeParse(body);
+  if (!parsedBody.success) {
+    return NextResponse.json({ error: "Invalid project data" }, { status: 400 });
+  }
+
+  const { name, description } = parsedBody.data;
 
   const ownership = await checkProjectOwnership(projectId, userId);
 
@@ -42,8 +59,8 @@ export async function PATCH(
   const project = await prisma.project.update({
     where: { id: projectId },
     data: {
-      name: name?.trim() || ownership.project!.name,
-      description: description?.trim() ?? ownership.project!.description,
+      ...(name?.trim() ? { name: name.trim() } : {}),
+      ...(typeof description === "string" ? { description: description.trim() } : {}),
     },
     include: {
       collaborators: true,

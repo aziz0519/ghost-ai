@@ -8,8 +8,9 @@ import { checkProjectAccess, getProjectsWithAccess } from "@/lib/project-access"
 export default async function EditorWorkspace({
   params,
 }: {
-  params: { roomId: string };
+  params: Promise<{ roomId: string }>;
 }) {
+  const { roomId } = await params;
   const { userId } = await auth();
 
   if (!userId) {
@@ -19,7 +20,7 @@ export default async function EditorWorkspace({
 
   // Fetch the project by ID (roomId)
   const project = await prisma.project.findUnique({
-    where: { id: params.roomId },
+    where: { id: roomId },
     include: {
       collaborators: true,
     },
@@ -31,9 +32,7 @@ export default async function EditorWorkspace({
   }
 
   // Check access - owner or collaborator
-  const { allowed } = await checkProjectAccess(params.roomId, {
-    userId,
-  });
+  const { allowed } = await checkProjectAccess(roomId);
 
   if (!allowed) {
     return <AccessDenied />;
@@ -49,7 +48,7 @@ export default async function EditorWorkspace({
     <EditorHomeClient
       initialProjects={[project]}
       sharedProjects={shared}
-      roomId={params.roomId}
+      roomId={roomId}
     />
   );
 }

@@ -36,12 +36,13 @@ export function EditorShell({ children, projects = [], sharedProjects = [], room
       <div className="flex-1 flex">
         <main className="flex-1 pt-16 min-w-0">{children}</main>
         {isRightSidebarOpen && (
-          <aside className="w-80 border-l border-border/60 bg-base/50 p-6">
+          <aside className="mt-16 w-80 border-l border-border/60 bg-base/50 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-foreground">AI Assistant</h3>
               <button
                 onClick={() => setIsRightSidebarOpen(false)}
                 className="text-muted-foreground hover:text-foreground"
+                aria-label="Close AI sidebar"
               >
                 ✕
               </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -62,10 +63,14 @@ export function ProjectSidebar({ isOpen, onClose, projects, sharedProjects, room
         key={project.id}
         className={isCurrentRoom ? `${baseClassName} ${activeClassName}` : baseClassName}
       >
-        <div className="flex-1 min-w-0">
+        <Link
+          href={`/editor/${project.id}`}
+          onClick={onClose}
+          className="flex-1 min-w-0"
+        >
           <p className="text-sm font-medium text-foreground truncate">{project.name}</p>
           <p className="text-xs text-muted-foreground truncate">ghost-ai/{slug}</p>
-        </div>
+        </Link>
         {isOwned && (
           <div className="flex items-center gap-1">
             <Button
