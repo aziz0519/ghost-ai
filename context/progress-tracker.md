@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Complete the project dialogs and editor home implementation with Create, Rename, Delete dialogs, sidebar actions, and slug preview.
+- Complete the Prisma schema, client singleton, and migration.
 
 ## Completed
 
@@ -34,6 +34,13 @@ Update this file whenever the current phase, active feature, or implementation s
 - Added mobile support: tapping outside sidebar closes it with backdrop scrim.
 - Used mock project data only, no API calls or persistence.
 - Verified with successful production build and no lint errors.
+- Created Prisma schema with `Project` and `ProjectCollaborator` models:
+  - Project: ownerId (mapped to Clerk user), name, optional description, status enum (DRAFT/ARCHIVED), canvasJsonPath, timestamps, indexes on ownerId and createdAt
+  - ProjectCollaborator: project relation with cascade delete, collaborator email, creation timestamp, unique constraint on project/email, indexes on email and project/date
+- Created `lib/prisma.ts` as a cached singleton with global caching for development hot reloads
+- Ran migration successfully (20261126034813_init) - database is in sync with schema
+- Generated Prisma Client successfully
+- Verified with successful production build and no lint errors
 
 ## In Progress
 
@@ -41,8 +48,8 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 
+- Implement project APIs (06-project-apis.md)
 - Extend the authenticated editor experience with additional panels and editor-specific interactions as new features are added.
-- Implement Prisma schema and project APIs (05-prisma.md, 06-project-apis.md).
 
 ## Open Questions
 
@@ -55,6 +62,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - Wrap the app with ClerkProvider and protect routes through a shared auth gate so the auth experience stays centralized and consistent.
 - Use a dedicated hook (`useProjectDialogs`) to manage all project dialog state, form state, and loading state.
 - Keep mock data in the sidebar component for now; replace with API calls in future chapters.
+- Downgraded Prisma to v5 for stable schema configuration and migration support (v7 had breaking changes to config format)
+- Prisma schema uses `datasource db` with `url = env("DATABASE_URL")` in schema.prisma (v5 standard)
 
 ## Session Notes
 
@@ -63,3 +72,5 @@ Update this file whenever the current phase, active feature, or implementation s
 - Clerk auth pages should remain minimal and use the existing CSS variables rather than hardcoded colors.
 - Dialog components use the existing shadcn dialog primitives with the dark theme styling.
 - Slug preview generates automatically from project name using lowercase, hyphen-separated format.
+- Prisma migration created tables: projects and project_collaborators with correct indexes and constraints
+- Docker PostgreSQL container used for local database
