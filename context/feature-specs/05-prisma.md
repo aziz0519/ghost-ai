@@ -32,10 +32,13 @@ Do not add extra fields unless required by Prisma.
 
 Create `lib/prisma.ts` as a cached singleton.
 
-Branch by `DATABASE_URL`:
+<!-- coderabbit-ai-generated:v1 -->
 
-- if it starts with `prisma+postgres://`, use Accelerate
-- otherwise use direct `@prisma/adapter-pg`
+<!-- coderabbit-ai-generated-section:v1:a552c152840b5679737b6a37ba67283e6d93b7fa4a751bd061459cad7db6fc64 -->
+
+With Prisma v5, construct the client using `new PrismaClient()` and the PostgreSQL `DATABASE_URL` configured in `prisma/schema.prisma`. The client does not branch on the URL or configure an adapter or Accelerate. `@prisma/adapter-pg` is installed but is not required for this implementation.
+
+<!-- /coderabbit-ai-generated:v1 -->
 
 Cache the client on `global` in development for hot reloads.
 
