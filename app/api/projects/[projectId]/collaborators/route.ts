@@ -1,5 +1,6 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
+import { getPrimaryEmail } from "@/lib/project-access";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -9,7 +10,8 @@ const inviteSchema = z.object({
 
 async function checkProjectAccess(
   projectId: string,
-  userId: string
+  userId: string,
+  allowCollaborators: boolean
 ) {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -17,19 +19,24 @@ async function checkProjectAccess(
   });
 
   if (!project) {
-    return { project: null, error: "Project not found", status: 404 };
+    return { error: "Project not found", status: 404 };
   }
 
   const isOwner = project.ownerId === userId;
-  const isCollaborator = project.collaborators.some(
-    (c) => c.email === userId || c.id === userId
-  );
+  if (isOwner) return { error: null, status: 200 };
 
-  if (!isOwner && !isCollaborator) {
-    return { project: null, error: "Forbidden", status: 403 };
+  if (allowCollaborators) {
+    if (project.collaborators.some((c) => c.id === userId)) {
+      return { error: null, status: 200 };
+    }
+
+    const email = await getPrimaryEmail();
+    if (email && project.collaborators.some((c) => c.email.trim().toLowerCase() === email)) {
+      return { error: null, status: 200 };
+    }
   }
 
-  return { project, error: null, status: 200, isOwner };
+  return { error: "Forbidden", status: 403 };
 }
 
 async function enrichCollaborators(collaborators: Array<{ email: string; id?: string }>) {
@@ -73,7 +80,7 @@ export async function GET(
 
   const { projectId } = await params;
 
-  const access = await checkProjectAccess(projectId, userId);
+  const access = await checkProjectAccess(projectId, userId, true);
 
   if (access.error) {
     return NextResponse.json({ error: access.error }, { status: access.status });
@@ -115,14 +122,10 @@ export async function POST(
 
   const { email } = parsedBody.data;
 
-  const access = await checkProjectAccess(projectId, userId);
+  const access = await checkProjectAccess(projectId, userId, false);
 
   if (access.error) {
     return NextResponse.json({ error: access.error }, { status: access.status });
-  }
-
-  if (!access.isOwner) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const existing = await prisma.projectCollaborator.findUnique({

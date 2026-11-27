@@ -130,7 +130,13 @@ Do not add a local user table.
 - Server-side ownership enforcement for all invite/remove operations
 - Input validation with Zod for email addresses
 - Rate limiting should be implemented (not included in this spec)
-- PII protection for collaborator emails (stored hashed in database)
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:3de7ed6e95c48582425fcf0bf7ed75887b212237ed50f34ac59221d4223d9929 -->
+
+- Collaborator email addresses are stored directly in `ProjectCollaborator.email` and used as email addresses for Clerk profile enrichment.
+
+<!-- /coderabbit-ai-generated:v1 -->
 - Access control verified for each operation
 
 ## References
