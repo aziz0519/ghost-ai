@@ -87,6 +87,16 @@ body {
   color: var(--text-primary);
   font-family: var(--font-geist-sans), sans-serif;
 }
+
+.workspace-canvas {
+  background-color: #0c0c10;
+  background-image:
+    radial-gradient(ellipse at 48% 0%, rgba(0, 200, 212, 0.1), transparent 38%),
+    radial-gradient(ellipse at 100% 100%, rgba(100, 87, 249, 0.13), transparent 30%),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: auto, auto, 56px 56px, 56px 56px;
+}
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 

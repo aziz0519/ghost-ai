@@ -1,8 +1,8 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { EditorShell } from "@/components/editor/editor-shell";
 import { ShareDialog } from "@/components/editor/share-dialog";
+import { WorkspaceCanvas } from "@/components/editor/workspace-canvas";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -21,25 +21,21 @@ export function EditorHomeClient({ initialProjects, sharedProjects, roomId }: Ed
     selectedProject,
     isLoading,
     formData,
-    openCreateDialog,
     openShareDialog,
     closeDialog,
     setName,
-    setSlug,
-    handleCreate,
     handleRename,
     handleDelete,
   } = useProjectActions();
 
-  const isCreateDialog = dialogType === "create";
   const isRenameDialog = dialogType === "rename";
   const isDeleteDialog = dialogType === "delete";
   const isShareDialog = dialogType === "share";
 
-  // Find the current project if roomId is provided
+  // Use the newest available project when the workspace route has no room ID.
   const currentProject = roomId
     ? initialProjects.find((p) => p.id === roomId) || sharedProjects.find((p) => p.id === roomId)
-    : null;
+    : initialProjects[0] || sharedProjects[0] || null;
 
   // Determine if the user is the owner of the current project
   const isOwner = currentProject
@@ -56,88 +52,14 @@ export function EditorHomeClient({ initialProjects, sharedProjects, roomId }: Ed
     <EditorShell
       projects={initialProjects}
       sharedProjects={sharedProjects}
-      roomId={roomId}
+      roomId={roomId ?? currentProject?.id}
       projectName={currentProject?.name}
-      projectId={roomId}
+      projectId={currentProject?.id}
       isOwner={isOwner}
       onShare={handleShare}
     >
-      <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-base px-6 py-10 text-primary">
-        <div className="w-full max-w-3xl space-y-6 text-center">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold text-foreground">
-              {currentProject
-                ? `Welcome to ${currentProject.name}`
-                : "Create a project or open an existing one"}
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              {currentProject
-                ? "Start building your architecture in this workspace."
-                : "Start a new architecture workspace, or choose a project from the sidebar."}
-            </p>
-          </div>
-
-          {currentProject ? (
-            <div className="text-sm text-muted-foreground">
-              Open the sidebar to switch projects or create a new one.
-            </div>
-          ) : (
-            <Button onClick={openCreateDialog} className="gap-2" size="lg">
-              <Plus className="h-5 w-5" />
-              New Project
-            </Button>
-          )}
-
-          <Dialog open={isCreateDialog} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create Project</DialogTitle>
-                <DialogDescription>Enter a name for your new project</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="project-name" className="text-sm font-medium text-foreground">
-                    Project Name
-                  </label>
-                  <Input
-                    id="project-name"
-                    value={formData.name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="My Project"
-                    autoFocus
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="project-slug" className="text-sm font-medium text-foreground">
-                    Slug
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">ghost-ai/</span>
-                    <Input
-                      id="project-slug"
-                      value={formData.slug}
-                      onChange={(e) => setSlug(e.target.value)}
-                      placeholder="my-project"
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    This will be used in the project URL. Generated automatically from the name.
-                  </p>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="ghost" onClick={closeDialog} disabled={isLoading}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreate} disabled={!formData.name.trim() || isLoading}>
-                  {isLoading ? "Creating..." : "Create Project"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
+      <>
+        <WorkspaceCanvas />
           <Dialog open={isRenameDialog} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
@@ -195,8 +117,7 @@ export function EditorHomeClient({ initialProjects, sharedProjects, roomId }: Ed
             projectId={currentProject?.id ?? null}
             isOwner={isOwner}
           />
-        </div>
-      </section>
+      </>
     </EditorShell>
   );
 }
