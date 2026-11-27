@@ -11,9 +11,21 @@ interface EditorShellProps {
   sharedProjects?: Project[];
   roomId?: string;
   projectName?: string;
+  projectId?: string;
+  isOwner?: boolean;
+  onShare?: (props: { projectId: string; isOwner: boolean }) => void;
 }
 
-export function EditorShell({ children, projects = [], sharedProjects = [], roomId, projectName }: EditorShellProps) {
+export function EditorShell({
+  children,
+  projects = [],
+  sharedProjects = [],
+  roomId,
+  projectName,
+  projectId,
+  isOwner,
+  onShare,
+}: EditorShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
 
@@ -25,6 +37,9 @@ export function EditorShell({ children, projects = [], sharedProjects = [], room
         onToggleRightSidebar={() => setIsRightSidebarOpen((value) => !value)}
         isRightSidebarOpen={isRightSidebarOpen}
         projectName={projectName}
+        projectId={projectId}
+        isOwner={isOwner}
+        onShare={onShare}
       />
       <ProjectSidebar
         isOpen={isSidebarOpen}

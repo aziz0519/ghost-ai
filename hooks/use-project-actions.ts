@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import type { Project } from "@/lib/project-types";
 
-type DialogType = "create" | "rename" | "delete" | null;
+type DialogType = "create" | "rename" | "delete" | "share" | null;
 
 interface UseProjectActionsReturn {
   dialogType: DialogType;
@@ -14,6 +14,7 @@ interface UseProjectActionsReturn {
   openCreateDialog: () => void;
   openRenameDialog: (project: Project) => void;
   openDeleteDialog: (project: Project) => void;
+  openShareDialog: (project: Project) => void;
   closeDialog: () => void;
   setName: (name: string) => void;
   setSlug: (slug: string) => void;
@@ -58,6 +59,12 @@ export function useProjectActions(): UseProjectActionsReturn {
   const openDeleteDialog = useCallback((project: Project) => {
     if (isLoadingRef.current) return;
     setDialogType("delete");
+    setSelectedProject(project);
+  }, []);
+
+  const openShareDialog = useCallback((project: Project) => {
+    if (isLoadingRef.current) return;
+    setDialogType("share");
     setSelectedProject(project);
   }, []);
 
@@ -181,6 +188,7 @@ export function useProjectActions(): UseProjectActionsReturn {
     openCreateDialog,
     openRenameDialog,
     openDeleteDialog,
+    openShareDialog,
     closeDialog,
     setName,
     setSlug,

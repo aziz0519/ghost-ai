@@ -14,7 +14,7 @@ export function AccessDenied() {
           Access Denied
         </h2>
         <p className="text-muted-foreground mb-6">
-          You don't have access to this project or it may have been deleted.
+          You don&apos;t have access to this project or it may have been deleted.
         </p>
         <Button
           variant="outline"
