@@ -8,7 +8,7 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Current Goal
 
-- Complete the project API routes for list, create, rename, and delete.
+- Extend the authenticated editor experience with additional panels and editor-specific interactions as new features are added.
 
 ## Completed
 
@@ -50,14 +50,36 @@ Update this file whenever the current phase, active feature, or implementation s
   - Unauthenticated requests return 401
   - Only project owner can rename or delete (returns 403 for non-owners)
   - Project not found returns 404
+- Implemented editor workspace shell (`/editor/[roomId]`):
+  - Server component with server-side access checks using Clerk auth() and Prisma queries
+  - Unauthenticated users redirected to /sign-in page
+  - AccessDenied component for unauthorized/non-existent projects
+  - Full-viewport three-panel layout with left sidebar (ProjectSidebar), central canvas placeholder, right sidebar (AI Assistant) placeholder
+  - Top navbar with project name, share button, and AI sidebar toggle
+  - Current room highlighted in sidebar with primary border/bg
+  - Shared Project interface across 4 files via lib/project-types.ts
+- Verified with successful production build and no TypeScript errors.
+- Wired the UI to use the project APIs (07-wire-editor-home.md):
+  - useProjectActions hook calls real API routes (POST, PATCH, DELETE) and uses router.refresh for optimistic updates
+  - EditorHomeClient and ProjectSidebar use the real API via useProjectActions
+  - Create dialog navigates to /editor/[projectId] after creation
+  - Verified with successful production build and no lint errors.
+- Implemented the share dialog (09-share-dialog.md):
+  - Share button in editor navbar opens share dialog
+  - API routes for collaborators: GET /api/projects/[projectId]/collaborators (list), POST (invite), DELETE (remove)
+  - Clerk Backend API enrichment for collaborator display names and avatars (fallback to email)
+  - Server-side ownership enforcement for invite/remove operations
+  - Owner sees invite input, collaborator list with remove buttons, and copy project link with "Copied!" feedback
+  - Collaborator sees read-only collaborator list only
+  - No local user table added - uses Clerk Backend API directly
+  - Verified with successful production build and no TypeScript errors.
 
 ## In Progress
 
-- None at the moment.
+- None
 
 ## Next Up
 
-- Wire the UI to use the project APIs (07-wire-editor-home.md)
 - Extend the authenticated editor experience with additional panels and editor-specific interactions as new features are added.
 
 ## Open Questions

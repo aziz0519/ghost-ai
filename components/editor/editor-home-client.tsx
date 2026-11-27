@@ -2,6 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { EditorShell } from "@/components/editor/editor-shell";
+import { ShareDialog } from "@/components/editor/share-dialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ export function EditorHomeClient({ initialProjects, sharedProjects, roomId }: Ed
     isLoading,
     formData,
     openCreateDialog,
+    openShareDialog,
     closeDialog,
     setName,
     setSlug,
@@ -32,11 +34,23 @@ export function EditorHomeClient({ initialProjects, sharedProjects, roomId }: Ed
   const isCreateDialog = dialogType === "create";
   const isRenameDialog = dialogType === "rename";
   const isDeleteDialog = dialogType === "delete";
+  const isShareDialog = dialogType === "share";
 
   // Find the current project if roomId is provided
   const currentProject = roomId
     ? initialProjects.find((p) => p.id === roomId) || sharedProjects.find((p) => p.id === roomId)
     : null;
+
+  // Determine if the user is the owner of the current project
+  const isOwner = currentProject
+    ? initialProjects.some((p) => p.id === currentProject.id)
+    : false;
+
+  const handleShare = () => {
+    if (currentProject) {
+      openShareDialog(currentProject);
+    }
+  };
 
   return (
     <EditorShell
@@ -44,6 +58,9 @@ export function EditorHomeClient({ initialProjects, sharedProjects, roomId }: Ed
       sharedProjects={sharedProjects}
       roomId={roomId}
       projectName={currentProject?.name}
+      projectId={roomId}
+      isOwner={isOwner}
+      onShare={handleShare}
     >
       <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-base px-6 py-10 text-primary">
         <div className="w-full max-w-3xl space-y-6 text-center">
@@ -171,6 +188,13 @@ export function EditorHomeClient({ initialProjects, sharedProjects, roomId }: Ed
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          <ShareDialog
+            open={isShareDialog}
+            onOpenChange={(open) => { if (!open) closeDialog(); }}
+            projectId={currentProject?.id ?? null}
+            isOwner={isOwner}
+          />
         </div>
       </section>
     </EditorShell>
