@@ -55,8 +55,8 @@ export function ProjectSidebar({ isOpen, onClose, projects, sharedProjects, room
   const renderProjectItem = (project: Project, isOwned: boolean) => {
     const isCurrentRoom = roomId && project.id === roomId;
     const slug = project.slug || project.id;
-    const baseClassName = "flex items-center justify-between gap-2 rounded-xl border border-border/60 bg-base/70 p-3 hover:bg-base/90 transition-colors";
-    const activeClassName = "border-primary/50 bg-primary/5 rounded-xl";
+    const baseClassName = "flex items-center justify-between gap-2 rounded-2xl border border-transparent bg-transparent px-3 py-2.5 transition-colors hover:bg-elevated/70";
+    const activeClassName = "border-border/70 bg-brand/10";
 
     return (
       <div
@@ -68,8 +68,8 @@ export function ProjectSidebar({ isOpen, onClose, projects, sharedProjects, room
           onClick={onClose}
           className="flex-1 min-w-0"
         >
-          <p className="text-sm font-medium text-foreground truncate">{project.name}</p>
-          <p className="text-xs text-muted-foreground truncate">ghost-ai/{slug}</p>
+          <p className="truncate text-sm font-medium text-foreground">{project.name}</p>
+          <span className="sr-only">ghost-ai/{slug}</span>
         </Link>
         {isOwned && (
           <div className="flex items-center gap-1">
@@ -104,7 +104,7 @@ export function ProjectSidebar({ isOpen, onClose, projects, sharedProjects, room
   const renderProjectList = (projects: Project[], isOwned: boolean) => {
     if (projects.length === 0) {
       return (
-        <div className="flex min-h-full items-center justify-center text-center">
+        <div className="flex min-h-32 items-center justify-center px-4 text-center">
           <p className="text-sm text-muted-foreground">
             {isOwned ? "No projects yet. Start a new one to get going." : "Shared projects will appear here."}
           </p>
@@ -129,49 +129,45 @@ export function ProjectSidebar({ isOpen, onClose, projects, sharedProjects, room
         />
       )}
       <aside
-        className={`
-          fixed left-4 top-20 z-30 w-[320px] rounded-3xl border border-border/70 bg-surface/95 shadow-2xl shadow-black/20 backdrop-blur-sm
-          ${isMobile ? "max-h-[calc(100vh-5rem)]" : ""}
-        `}
+        className={isMobile
+          ? "fixed inset-y-14 left-2 z-30 flex max-h-[calc(100dvh-4rem)] w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-[24px] border border-border/80 bg-surface shadow-2xl shadow-black/30"
+          : "relative z-10 hidden h-full w-72 shrink-0 flex-col overflow-hidden rounded-[24px] border border-border/80 bg-surface md:flex"}
       >
-        <div className="flex items-center justify-between border-b border-border/60 px-4 py-4">
-          <div>
-            <p className="text-sm font-medium text-foreground">Projects</p>
-            <p className="text-sm text-muted-foreground">Browse and organize your work</p>
-          </div>
+        <div className="flex items-center justify-between border-b border-border/70 px-4 py-3.5">
+          <p className="text-sm font-semibold text-foreground">Projects</p>
           <Button
             type="button"
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label="Close projects sidebar"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        <Tabs defaultValue="my-projects" className="px-4 py-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="my-projects">My Projects</TabsTrigger>
-            <TabsTrigger value="shared">Shared</TabsTrigger>
+        <Tabs defaultValue="my-projects" className="flex min-h-0 flex-1 flex-col px-3 py-3">
+          <TabsList className="grid h-9 w-full grid-cols-2 rounded-xl bg-elevated p-1">
+            <TabsTrigger value="my-projects" className="rounded-lg text-xs">My Projects</TabsTrigger>
+            <TabsTrigger value="shared" className="rounded-lg text-xs">Shared</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="my-projects" className="mt-4">
-            <ScrollArea className="h-56 rounded-2xl border border-border/60 bg-base/70 p-4">
+          <TabsContent value="my-projects" className="mt-3 min-h-0 flex-1">
+            <ScrollArea className="h-full">
               {renderProjectList(projects, true)}
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="shared" className="mt-4">
-            <ScrollArea className="h-56 rounded-2xl border border-border/60 bg-base/70 p-4">
+          <TabsContent value="shared" className="mt-3 min-h-0 flex-1">
+            <ScrollArea className="h-full">
               {renderProjectList(sharedProjects, false)}
             </ScrollArea>
           </TabsContent>
         </Tabs>
 
-        <div className="border-t border-border/60 p-4">
-          <Button type="button" onClick={openCreateDialog} className="w-full justify-start gap-2">
+        <div className="border-t border-border/70 p-2">
+          <Button type="button" onClick={openCreateDialog} className="h-9 w-full justify-center gap-2 rounded-xl">
             <Plus className="h-4 w-4" />
             New Project
           </Button>
