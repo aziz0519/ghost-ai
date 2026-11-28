@@ -64,9 +64,6 @@ Update this file whenever the current phase, active feature, or implementation s
   - EditorHomeClient and ProjectSidebar use the real API via useProjectActions
   - Create dialog navigates to /editor/[projectId] after creation
   - Verified with successful production build and no lint errors.
-<!-- coderabbit-ai-generated:v1 -->
-
-<!-- coderabbit-ai-generated-section:v1:bb4a96d46ad491efd8305ca24d0103b99488f871ab0a732aca31b1efc1f257d5 -->
 
 - Implemented the share dialog (09-share-dialog.md):
   - Share button in editor navbar opens share dialog
@@ -79,7 +76,7 @@ Update this file whenever the current phase, active feature, or implementation s
   - Verified with successful production build and no TypeScript errors.
   - Updated listing access to recognize verified primary emails, reset dialog state per session, block mutations during the initial load, and provide manual copying on clipboard failure.
 
-<!-- /coderabbit-ai-generated:v1 -->
+
 
 ## In Progress
 
