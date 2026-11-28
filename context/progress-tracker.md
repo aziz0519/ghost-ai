@@ -76,7 +76,24 @@ Update this file whenever the current phase, active feature, or implementation s
   - Verified with successful production build and no TypeScript errors.
   - Updated listing access to recognize verified primary emails, reset dialog state per session, block mutations during the initial load, and provide manual copying on clipboard failure.
 
+- Implemented Liveblocks realtime collaboration infrastructure (10-liveblocks-setup.md):
+  - `liveblocks.config.ts` - Defines Presence (cursor position, isThinking, cursor, presenceId) and UserMeta (userId, name, avatar, cursorColor) with global Liveblocks interface
+  - `lib/liveblocks.ts` - Cached Liveblocks node client singleton using @liveblocks/node
+  - `app/api/liveblocks-auth/route.ts` - Auth endpoint with Clerk authentication, project access verification, room creation, and session token with user metadata (name, avatar, cursorColor)
+  - Returns 403 for unauthorized project access, 401 for unauthenticated users
+  - Verified with successful production build.
 
+- Implemented base collaborative canvas (11-base-canvas.md):
+  - `types/canvas.ts` - Shared types: CanvasNodeData (label, color, shape), CanvasEdgeData, CanvasNode, CanvasEdge with custom types canvasNode and canvasEdge
+  - `components/editor/canvas-client.tsx` - Liveblocks React Flow canvas with:
+    - LiveblocksProvider with /api/liveblocks-auth endpoint
+    - RoomProvider with roomId and initial presence
+    - ClientSideSuspense with loading fallback
+    - useLiveblocksFlow with suspense enabled
+    - ReactFlow with loose connection mode, fitView, MiniMap, and dot-pattern Background
+  - `components/editor/workspace-canvas.tsx` - Wrapper accepting optional roomId prop
+  - `components/editor/editor-home-client.tsx` - Passes roomId to WorkspaceCanvas
+  - Verified with successful production build and no TypeScript errors.
 
 ## In Progress
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { EditorShell } from "@/components/editor/editor-shell";
-import { WorkspaceCanvas } from "@/components/editor/workspace-canvas";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -25,7 +24,11 @@ export function EditorHomeContent() {
   return (
     <EditorShell>
       <>
-        <WorkspaceCanvas />
+        <div className="flex min-h-0 flex-1 items-center justify-center rounded-[24px] border border-dashed border-border/80 bg-surface px-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Select a project from the sidebar to open its canvas.
+          </p>
+        </div>
           <Dialog open={isRenameDialog} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>

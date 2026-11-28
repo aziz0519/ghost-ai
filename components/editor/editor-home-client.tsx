@@ -52,14 +52,25 @@ export function EditorHomeClient({ initialProjects, sharedProjects, roomId }: Ed
     <EditorShell
       projects={initialProjects}
       sharedProjects={sharedProjects}
-      roomId={roomId ?? currentProject?.id}
+      roomId={currentProject?.id}
       projectName={currentProject?.name}
       projectId={currentProject?.id}
       isOwner={isOwner}
       onShare={handleShare}
     >
       <>
-        <WorkspaceCanvas />
+        {currentProject ? (
+          <WorkspaceCanvas roomId={currentProject.id} />
+        ) : (
+          <div className="flex min-h-0 flex-1 items-center justify-center rounded-[24px] border border-dashed border-border/80 bg-surface px-6 text-center">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">No project selected</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Create a project or select one from the sidebar to open its canvas.
+              </p>
+            </div>
+          </div>
+        )}
           <Dialog open={isRenameDialog} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
